@@ -4,12 +4,12 @@ import cv2
 import os
 
 
-df = pd.read_csv("/scratch/datasets/UMD_triplet/OND.valtests.0000.0001_single_df.csv", index_col=None)
-root = "/scratch/datasets/UMD_triplet/"
-output_directory = "./boxes/"
+df = pd.read_csv("The CSV file path here", index_col=None)
+root = "The images file root path"
+output_directory = "The output directroy Path to save the new images with label "
 
 
-
+#Go through each image in the CSV file and get all the needed information to use it for creating bb and name to add on each image
 for index, row in df.iterrows():
     address = row["new_image_path"]
     image_width = row["image_width"]
@@ -46,7 +46,7 @@ for index, row in df.iterrows():
     assert subject_ymax <= height
     assert object_ymin <= object_ymax
     assert object_ymax <= height
-    
+    #Create bounding box for the subject
     if (subject_xmax >=0) or (subject_ymax >=0):
       subject_xmin = max(0,subject_xmin)
       subject_xmax = max(0,subject_xmax)
@@ -55,7 +55,7 @@ for index, row in df.iterrows():
       im_1 = cv2.rectangle(img, (subject_xmin,subject_ymin), (subject_xmax,subject_ymax), (0,0,255), 3)
     else:
       im_1 = img
-
+    #Create bounding box for the Object
     if (object_xmax >=0) or (object_ymax >=0):
       object_xmin = max(0,object_xmin)
       object_xmax = max(0,object_xmax)
@@ -64,14 +64,17 @@ for index, row in df.iterrows():
       im_2 = cv2.rectangle(im_1, (object_xmin,object_ymin), (object_xmax,object_ymax), (0,255,0), 3)
     else:
       im_2 = im_1
-
+    #Create the text for name triplet
     text_1 = f"< {subject_name} , {verb_name} , {object_name} >"
+    #Create the text for id traplet
     text_2 = f"< {subject_id} , {verb_id} , {object_id} >"
     org_1 = (10, 50)
     org_2 = (10, 100)
+    #Put the text of the name and id on the image
     im_3 = cv2.putText(im_2, text_1, org_1, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
     image = cv2.putText(im_2, text_2, org_2, cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
     # cv.putText(	img, text, Point org , int fontFace, double fontScale, color , thickness , lineType, [ bottomLeftOrigin]	)
     
     filename = address.replace("/", "_")
+    #Save the new image after adding the bb and names
     cv2.imwrite(output_directory + filename, image)
